@@ -3,10 +3,10 @@
   "displayName": "Outline Chinese Comments",
   "description": "在 VS Code 自带大纲中显示中文注释，支持悬停提示和代码镜头",
   "version": "0.0.1",
-  "publisher": "wonvy",
+  "publisher": "Wonvy",
   "author": {
     "name": "Wonvy",
-    "email": "wonvy@example.com"
+    "email": "iamwonvy@gmail.com"
   },
   "icon": "icon-256.png",
   "repository": {
