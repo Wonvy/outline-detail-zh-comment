@@ -1,7 +1,7 @@
 {
   "name": "outline-detail-zh-comment",
   "displayName": "Outline 中文注释",
-  "description": "在代码地图中显示函数名后的中文注释",
+  "description": "在 VS Code 自带大纲中显示中文注释，支持悬停提示和代码镜头",
   "version": "0.0.1",
   "publisher": "you",
   "repository": {
@@ -21,6 +21,34 @@
   "main": "./out/extension.js",
   "contributes": {
     "documentSymbol": [
+      {
+        "language": "typescript"
+      },
+      {
+        "language": "javascript"
+      },
+      {
+        "language": "typescriptreact"
+      },
+      {
+        "language": "javascriptreact"
+      }
+    ],
+    "hover": [
+      {
+        "language": "typescript"
+      },
+      {
+        "language": "javascript"
+      },
+      {
+        "language": "typescriptreact"
+      },
+      {
+        "language": "javascriptreact"
+      }
+    ],
+    "codeLens": [
       {
         "language": "typescript"
       },

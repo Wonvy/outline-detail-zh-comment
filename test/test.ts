@@ -1,67 +1,68 @@
-// 这是一个测试文件，用于演示插件功能
+// 这是一个测试文件，用于验证中文注释插件的功能
 
-// 用户登录函数
-function loginUser(username: string, password: string): boolean {
-  // 验证用户凭据
-  return true;
+// 简单的函数声明
+// 这是一个测试函数
+function simpleFunction1() {
+    console.log('Hello World');
 }
 
-// 获取用户信息
-const getUserInfo = (userId: number) => {
-  // 从数据库获取用户信息
-  return { id: userId, name: '测试用户' };
-};
-
-// 计算订单总价
-const calculateOrderTotal = (items: any[]) => {
-  // 计算商品总价
-  return items.reduce((total, item) => total + item.price, 0);
-};
-
-/**
- * 用户类
- * 用于管理用户相关操作
- */
-class User {
-  // 用户ID
-  private id: number;
-  
-  // 用户名
-  private name: string;
-
-  // 构造函数
-  constructor(id: number, name: string) {
-    this.id = id;
-    this.name = name;
-  }
-
-  // 获取用户信息
-  getUserInfo() {
-    return { id: this.id, name: this.name };
-  }
-
-  // 更新用户信息
-  updateUserInfo(newName: string) {
-    this.name = newName;
-  }
+// 另一个测试函数
+function simpleFunction2() {
+    return 'Hello';
 }
 
-// 订单接口
-interface Order {
-  // 订单ID
-  id: number;
-  // 订单状态
-  status: string;
+// 测试类
+// 这是一个简单的测试类
+class SimpleClass {
+    // 类的构造函数
+    constructor() {
+        console.log('Class created');
+    }
+    
+    // 类的方法
+    // 这是一个简单的方法
+    simpleMethod() {
+        return 'method called';
+    }
 }
 
-// 处理订单
-const processOrder = (order: Order) => {
-  // 处理订单逻辑
-  console.log('处理订单:', order.id);
+// 测试接口
+// 这是一个测试接口
+interface TestInterface {
+    name: string;
+    age: number;
+}
+
+// 测试类型别名
+// 这是一个测试类型
+type TestType = string | number;
+
+// 测试枚举
+// 这是一个测试枚举
+enum TestEnum {
+    // 第一个枚举值
+    First = 'first',
+    // 第二个枚举值
+    Second = 'second'
+}
+
+// 测试箭头函数
+// 这是一个箭头函数
+const arrowFunction = () => {
+    return 'arrow function';
 };
 
-// 导出函数
-export const exportedFunction = () => {
-  // 导出的函数
-  return 'exported';
-}; 
+// 测试类表达式
+// 这是一个类表达式
+const ClassExpression = class {
+    // 类表达式的方法
+    method() {
+        return 'class expression method';
+    }
+};
+
+// 导出测试
+// 导出测试函数
+export function exportedFunction() {
+    return 'exported';
+} 

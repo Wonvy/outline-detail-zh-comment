@@ -22,6 +22,7 @@ export function activate(ctx: vscode.ExtensionContext) {
     { language: 'javascriptreact', scheme: 'file' }
   ];
 
+  // 注册 DocumentSymbolProvider 来增强自带的大纲视图，支持层级结构
   const provider = vscode.languages.registerDocumentSymbolProvider(selector, {
     provideDocumentSymbols(doc: vscode.TextDocument) {
       outputChannel.appendLine(`📄 正在处理文档: ${doc.fileName}`);
@@ -31,17 +32,32 @@ export function activate(ctx: vscode.ExtensionContext) {
         const sf = ts.createSourceFile(doc.fileName, text, ts.ScriptTarget.Latest, true, guessScriptKind(doc.fileName));
         const out: vscode.DocumentSymbol[] = [];
 
-        const visit = (node: ts.Node) => {
-          const s = makeSymbol(node, doc, text, outputChannel);
-          if (s) {
-            outputChannel.appendLine(`✅ 创建符号: ${s.name}`);
-            out.push(s);
+        // 使用递归方式构建层级结构
+        const visit = (node: ts.Node, parentSymbol?: vscode.DocumentSymbol) => {
+          const symbol = makeSymbol(node, doc, text, outputChannel);
+          if (symbol) {
+            outputChannel.appendLine(`✅ 创建符号: ${symbol.name}`);
+            
+            if (parentSymbol) {
+              // 如果有父级符号，添加到父级的 children 中
+              parentSymbol.children = parentSymbol.children || [];
+              parentSymbol.children.push(symbol);
+              outputChannel.appendLine(`📁 将 ${symbol.name} 添加到 ${parentSymbol.name} 的子级`);
+            } else {
+              // 顶级符号直接添加到输出数组
+              out.push(symbol);
+            }
+            
+            // 递归处理子节点，传递当前符号作为父级
+            ts.forEachChild(node, (child) => visit(child, symbol));
+          } else {
+            // 如果没有创建符号，但仍然需要递归处理子节点
+            ts.forEachChild(node, (child) => visit(child, parentSymbol));
           }
-          ts.forEachChild(node, visit);
         };
         
         visit(sf);
-        outputChannel.appendLine(`🎯 总共找到 ${out.length} 个符号`);
+        outputChannel.appendLine(`🎯 总共找到 ${out.length} 个顶级符号`);
         return out;
       } catch (error) {
         outputChannel.appendLine(`❌ 处理文档时出错: ${error}`);
@@ -50,11 +66,70 @@ export function activate(ctx: vscode.ExtensionContext) {
     }
   });
 
-  ctx.subscriptions.push(provider);
-  outputChannel.appendLine('✅ DocumentSymbolProvider 已注册');
+  // 注册 HoverProvider 来在悬停时显示中文注释
+  const hoverProvider = vscode.languages.registerHoverProvider(selector, {
+    provideHover(document, position, token) {
+      try {
+        const text = document.getText();
+        const sf = ts.createSourceFile(document.fileName, text, ts.ScriptTarget.Latest, true, guessScriptKind(document.fileName));
+        
+        // 找到当前位置的节点
+        const node = findNodeAtPosition(sf, position, document);
+        if (!node) return null;
+        
+        const comment = extractChineseLineAbove(document, node, outputChannel) || extractChineseJSDoc(node, text, outputChannel);
+        if (comment) {
+          return new vscode.Hover([
+            `**中文注释:** ${comment}`,
+            `**类型:** ${getNodeType(node)}`
+          ]);
+        }
+      } catch (error) {
+        outputChannel.appendLine(`❌ Hover 提供者出错: ${error}`);
+      }
+      return null;
+    }
+  });
+
+  // 注册 CodeLensProvider 来在代码上方显示中文注释
+  const codeLensProvider = vscode.languages.registerCodeLensProvider(selector, {
+    provideCodeLenses(document, token) {
+      try {
+        const text = document.getText();
+        const sf = ts.createSourceFile(document.fileName, text, ts.ScriptTarget.Latest, true, guessScriptKind(document.fileName));
+        const lenses: vscode.CodeLens[] = [];
+
+        const visit = (node: ts.Node) => {
+          if (ts.isFunctionDeclaration(node) || ts.isMethodDeclaration(node) || ts.isClassDeclaration(node)) {
+            const comment = extractChineseLineAbove(document, node, outputChannel) || extractChineseJSDoc(node, text, outputChannel);
+            if (comment) {
+              const range = new vscode.Range(
+                document.positionAt(node.getStart()),
+                document.positionAt(node.getEnd())
+              );
+              lenses.push(new vscode.CodeLens(range, {
+                title: `💬 ${comment}`,
+                command: ''
+              }));
+            }
+          }
+          ts.forEachChild(node, visit);
+        };
+        
+        visit(sf);
+        return lenses;
+      } catch (error) {
+        outputChannel.appendLine(`❌ CodeLens 提供者出错: ${error}`);
+        return [];
+      }
+    }
+  });
+
+  ctx.subscriptions.push(provider, hoverProvider, codeLensProvider);
+  outputChannel.appendLine('✅ 所有提供者已注册');
   
-  // 再次显示激活成功消息
-  vscode.window.showInformationMessage('✅ DocumentSymbolProvider 已注册！');
+  // 显示激活成功消息
+  vscode.window.showInformationMessage('✅ 中文注释插件已集成到自带大纲中，支持层级结构！');
 }
 
 function guessScriptKind(path: string): ts.ScriptKind {
@@ -233,6 +308,37 @@ function extractChineseJSDoc(node: ts.Node, fullText: string, outputChannel: vsc
 function hasChinese(s: string) {
   const result = /[\u4e00-\u9fa5]/.test(s);
   return result;
+}
+
+function findNodeAtPosition(sf: ts.SourceFile, position: vscode.Position, document: vscode.TextDocument): ts.Node | null {
+  let result: ts.Node | null = null;
+  
+  const visit = (node: ts.Node) => {
+    const start = document.positionAt(node.getStart());
+    const end = document.positionAt(node.getEnd());
+    
+    if (position.isAfterOrEqual(start) && position.isBeforeOrEqual(end)) {
+      if (!result || (node.getStart() <= result.getStart() && node.getEnd() >= result.getEnd())) {
+        result = node;
+      }
+    }
+    
+    ts.forEachChild(node, visit);
+  };
+  
+  visit(sf);
+  return result;
+}
+
+function getNodeType(node: ts.Node): string {
+  if (ts.isFunctionDeclaration(node)) return '函数声明';
+  if (ts.isMethodDeclaration(node)) return '类方法';
+  if (ts.isClassDeclaration(node)) return '类声明';
+  if (ts.isInterfaceDeclaration(node)) return '接口声明';
+  if (ts.isTypeAliasDeclaration(node)) return '类型别名';
+  if (ts.isEnumDeclaration(node)) return '枚举声明';
+  if (ts.isVariableStatement(node)) return '变量声明';
+  return '未知类型';
 }
 
 export function deactivate() {} 
