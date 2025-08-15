@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <style>
+      .blue { fill: #007ACC; }
+      .lblue { stroke: #7FB8F0; stroke-width: 15.36; stroke-linecap: round; }
+      .grayline { stroke: #CBD5E1; stroke-width: 10.24; stroke-linecap: round; }
+    </style>
+  </defs>
+  <g>
+    <!-- Outline vertical -->
+    <line x1="64.0" y1="46.08" x2="64.0" y2="204.8" class="lblue"/>
+    <!-- Nodes and lines -->
+    <g>
+      <circle cx="64.0" cy="64.0" r="20.48" class="blue"/>
+      <line x1="97.28" y1="64.0" x2="140.8" y2="64.0" class="lblue"/>
+      <line x1="151.04000000000002" y1="64.0" x2="217.6" y2="64.0" class="grayline"/>
+    </g>
+    <g>
+      <circle cx="64.0" cy="115.2" r="20.48" class="blue"/>
+      <line x1="97.28" y1="115.2" x2="140.8" y2="115.2" class="lblue"/>
+      <line x1="151.04000000000002" y1="115.2" x2="217.6" y2="115.2" class="grayline"/>
+    </g>
+    <g>
+      <circle cx="64.0" cy="166.4" r="20.48" class="blue"/>
+      <line x1="97.28" y1="166.4" x2="140.8" y2="166.4" class="lblue"/>
+      <line x1="151.04000000000002" y1="166.4" x2="217.6" y2="166.4" class="grayline"/>
+    </g>
+
+    <!-- Comment bubble -->
+    <g>
+      <rect x="87.04" y="15.36" width="158.72" height="102.4" rx="20.48" fill="#FFD54F"/>
+      <polygon points="142.592,117.76 158.464,117.76 150.52800000000002,143.36" fill="#FFD54F"/>
+      <rect x="102.4" y="40.96" width="119.03999999999999" height="15.36" rx="7.68" fill="#1F2937"/>
+      <rect x="102.4" y="64.0" width="87.296" height="15.36" rx="7.68" fill="#1F2937"/>
+      <rect x="102.4" y="87.03999999999999" width="103.168" height="15.36" rx="7.68" fill="#1F2937"/>
+    </g>
+
+    <!-- Code chevrons -->
+    <polygon points="153.856,199.68 179.2,171.52 179.2,227.84" fill="#007ACC"/>
+    <polygon points="222.84799999999998,199.68 197.504,171.52 197.504,227.84" fill="#007ACC"/>
+  </g>
+</svg>

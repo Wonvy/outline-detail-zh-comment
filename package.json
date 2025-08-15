@@ -1,12 +1,17 @@
 {
-  "name": "outline-detail-zh-comment",
-  "displayName": "Outline 中文注释",
+  "name": "outline-zh-comments",
+  "displayName": "Outline Chinese Comments",
   "description": "在 VS Code 自带大纲中显示中文注释，支持悬停提示和代码镜头",
   "version": "0.0.1",
-  "publisher": "you",
+  "publisher": "wonvy",
+  "author": {
+    "name": "Wonvy",
+    "email": "wonvy@example.com"
+  },
+  "icon": "icon-256.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/outline-detail-zh-comment.git"
+    "url": "https://github.com/wonvy/outline-zh-comments.git"
   },
   "license": "MIT",
   "engines": {
@@ -14,6 +19,14 @@
   },
   "categories": [
     "Other"
+  ],
+  "keywords": [
+    "outline",
+    "chinese",
+    "comments",
+    "documentation",
+    "typescript",
+    "javascript"
   ],
   "activationEvents": [
     "onStartupFinished"
