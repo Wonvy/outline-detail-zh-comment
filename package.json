@@ -1,9 +1,14 @@
 {
   "name": "outline-detail-zh-comment",
-  "displayName": "Outline Detail: Chinese Comment After Name",
+  "displayName": "Outline 中文注释",
   "description": "在代码地图中显示函数名后的中文注释",
   "version": "0.0.1",
   "publisher": "you",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/outline-detail-zh-comment.git"
+  },
+  "license": "MIT",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -35,9 +40,11 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./"
   },
+  "dependencies": {
+    "typescript": "^5.0.4"
+  },
   "devDependencies": {
     "@types/vscode": "^1.80.0",
-    "@types/node": "16.x",
-    "typescript": "^5.0.4"
+    "@types/node": "16.x"
   }
 }

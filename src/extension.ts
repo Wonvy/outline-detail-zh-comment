@@ -2,14 +2,18 @@ import * as vscode from 'vscode';
 import * as ts from 'typescript';
 
 export function activate(ctx: vscode.ExtensionContext) {
-  console.log('🎉 插件已激活: Outline Detail: Chinese Comment After Name');
+  // 强制显示激活消息
+  vscode.window.showInformationMessage('🎉 Outline 中文注释插件已激活！');
+  
+  // 在控制台输出激活信息
+  console.log('🎉 插件已激活: Outline 中文注释');
   
   // 创建输出通道
-  const outputChannel = vscode.window.createOutputChannel('Outline Detail: Chinese Comment After Name');
-  outputChannel.appendLine('🎉 插件已激活: Outline Detail: Chinese Comment After Name');
+  const outputChannel = vscode.window.createOutputChannel('Outline 中文注释');
+  outputChannel.appendLine('🎉 插件已激活: Outline 中文注释');
   
-  // 显示激活成功消息
-  vscode.window.showInformationMessage('Outline Detail 插件已激活！');
+  // 强制显示输出通道
+  outputChannel.show();
   
   const selector: vscode.DocumentSelector = [
     { language: 'typescript', scheme: 'file' },
@@ -21,19 +25,16 @@ export function activate(ctx: vscode.ExtensionContext) {
   const provider = vscode.languages.registerDocumentSymbolProvider(selector, {
     provideDocumentSymbols(doc: vscode.TextDocument) {
       outputChannel.appendLine(`📄 正在处理文档: ${doc.fileName}`);
-      outputChannel.appendLine(`📄 文档语言: ${doc.languageId}`);
       
       try {
         const text = doc.getText();
-        outputChannel.appendLine(`📄 文档长度: ${text.length} 字符`);
-        
         const sf = ts.createSourceFile(doc.fileName, text, ts.ScriptTarget.Latest, true, guessScriptKind(doc.fileName));
         const out: vscode.DocumentSymbol[] = [];
 
         const visit = (node: ts.Node) => {
           const s = makeSymbol(node, doc, text, outputChannel);
           if (s) {
-            outputChannel.appendLine(`✅ 创建符号: ${s.name} - ${s.detail}`);
+            outputChannel.appendLine(`✅ 创建符号: ${s.name}`);
             out.push(s);
           }
           ts.forEachChild(node, visit);
@@ -51,6 +52,9 @@ export function activate(ctx: vscode.ExtensionContext) {
 
   ctx.subscriptions.push(provider);
   outputChannel.appendLine('✅ DocumentSymbolProvider 已注册');
+  
+  // 再次显示激活成功消息
+  vscode.window.showInformationMessage('✅ DocumentSymbolProvider 已注册！');
 }
 
 function guessScriptKind(path: string): ts.ScriptKind {
@@ -63,37 +67,31 @@ function guessScriptKind(path: string): ts.ScriptKind {
 function makeSymbol(node: ts.Node, doc: vscode.TextDocument, fullText: string, outputChannel: vscode.OutputChannel): vscode.DocumentSymbol | null {
   // 函数声明
   if (ts.isFunctionDeclaration(node) && node.name) {
-    console.log(`找到函数声明: ${node.name.getText()}`);
     return build(doc, node, node.name, vscode.SymbolKind.Function, fullText, outputChannel);
   }
   
   // 类方法
   if (ts.isMethodDeclaration(node) && node.name) {
-    outputChannel.appendLine(`找到类方法: ${node.name.getText()}`);
     return build(doc, node, node.name, vscode.SymbolKind.Method, fullText, outputChannel);
   }
   
   // 类声明
   if (ts.isClassDeclaration(node) && node.name) {
-    outputChannel.appendLine(`找到类声明: ${node.name.getText()}`);
     return build(doc, node, node.name, vscode.SymbolKind.Class, fullText, outputChannel);
   }
   
   // 接口声明
   if (ts.isInterfaceDeclaration(node)) {
-    outputChannel.appendLine(`找到接口声明: ${node.name.getText()}`);
     return build(doc, node, node.name, vscode.SymbolKind.Interface, fullText, outputChannel);
   }
   
   // 类型别名
   if (ts.isTypeAliasDeclaration(node)) {
-    outputChannel.appendLine(`找到类型别名: ${node.name.getText()}`);
     return build(doc, node, node.name, vscode.SymbolKind.TypeParameter, fullText, outputChannel);
   }
   
   // 枚举声明
   if (ts.isEnumDeclaration(node)) {
-    outputChannel.appendLine(`找到枚举声明: ${node.name.getText()}`);
     return build(doc, node, node.name, vscode.SymbolKind.Enum, fullText, outputChannel);
   }
   
@@ -102,12 +100,10 @@ function makeSymbol(node: ts.Node, doc: vscode.TextDocument, fullText: string, o
     for (const d of node.declarationList.declarations) {
       if (d.name && d.initializer) {
         if (ts.isArrowFunction(d.initializer) || ts.isFunctionExpression(d.initializer)) {
-          outputChannel.appendLine(`找到箭头函数/函数表达式: ${d.name.getText()}`);
           return build(doc, d, d.name, vscode.SymbolKind.Function, fullText, outputChannel);
         }
         // 检查是否是类
         if (ts.isClassExpression(d.initializer)) {
-          outputChannel.appendLine(`找到类表达式: ${d.name.getText()}`);
           return build(doc, node, d.name, vscode.SymbolKind.Class, fullText, outputChannel);
         }
       }
@@ -117,7 +113,6 @@ function makeSymbol(node: ts.Node, doc: vscode.TextDocument, fullText: string, o
   // 导出声明
   if (ts.isExportDeclaration(node) && node.exportClause && ts.isNamedExports(node.exportClause)) {
     for (const specifier of node.exportClause.elements) {
-      outputChannel.appendLine(`找到导出声明: ${specifier.name.getText()}`);
       return build(doc, node, specifier.name, vscode.SymbolKind.Variable, fullText, outputChannel);
     }
   }
@@ -144,7 +139,15 @@ function build(
     outputChannel.appendLine(`Found comment for ${originalName}: "${comment}"`);
   }
   
+  // 创建 DocumentSymbol，使用原始名称，注释放在 detail 字段中
   const ds = new vscode.DocumentSymbol(originalName, comment, kind, range, sel);
+  
+  // 设置 detail 字段显示注释（灰字部分）
+  if (comment) {
+    ds.detail = comment;
+    outputChannel.appendLine(`设置 detail 字段: "${comment}"`);
+  }
+  
   return ds;
 }
 
@@ -229,8 +232,7 @@ function extractChineseJSDoc(node: ts.Node, fullText: string, outputChannel: vsc
 
 function hasChinese(s: string) {
   const result = /[\u4e00-\u9fa5]/.test(s);
-  console.log(`检查字符串 "${s}" 是否包含中文: ${result}`);
   return result;
 }
 
-export function deactivate() {}
+export function deactivate() {} 
